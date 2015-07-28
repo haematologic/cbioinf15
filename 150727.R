@@ -265,8 +265,4 @@ ERStatus <- pData(eset)$ER
 ERStatus
 boxplot (mygene ~ ERStatus)
 t.test(mygene ~ ERStatus)
-
-
-#### 150727-PM ###
-
-
+### End 150727 ###
