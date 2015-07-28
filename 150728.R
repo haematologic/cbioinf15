@@ -176,13 +176,31 @@ length(bam.sub)
 length(bam.sub2)
 all(names(bam.sub)==names(bam.sub2))
 length(hg19[["chr22"]])
-
-###
+length(hg19[["chr21"]])
+length(hg19[["chr20"]])
+length(hg19[["chr19"]])
 chrLen <- NULL
 cnames <- seqnames(hg19)
-# need to define seqnames - see ranges.R
-cnames
-
+for (i in 1:length(cnames)){
+  currentChr <- cnames[i]
+  print(currentChr)
+  chrLen[i] <- length(hg19[[currentChr]])
+}
+chrLen
+names(chrLen) <- seqnames(hg19)
+names(chrLen)
+chrLen
+#same as looping done below
+chrLen <- lapply(seqnames(hg19), function(x) length(hg19[[x]]))
+chrLen
+names(chrLen) <- seqnames(hg19)
+chrLen <- chrLen[chrLen>5000000]
+chrLen
+str(chrLen)
+totalLength <- sum(as.numeric(chrLen))
+totalLength
+str(totalLength)
+barplot(100*(chrLen / totalLength))
 
 ### 150728 PM ###
 N<- 60 # participants (variables)
