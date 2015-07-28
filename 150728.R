@@ -156,5 +156,145 @@ HighCov <- reduce(HighCov)
 HighCovGR <- GRanges("22",HighCov)
 HighCovGR
 ?paste # concatenates strings
-names(HighCovGR) <- paste()
+names(HighCovGR) <- paste("Region", 1:length(HighCov),sep="")
+bam.sub <- bamFilt[bamFilt %over% HighCovGR]
+bam.sub
+length(bam.sub)
+countOverlaps(HighCovGR,bamFilt)
+sum(countOverlaps(HighCovGR,bamFilt))
+
+#not informative
+countOverlaps(bamFilt,HighCovGR)
+
+bam.sub2 <- readGAlignments(file=mybam,use.names=TRUE,
+                            param=ScanBamParam(which=HighCovGR,
+                                               what=c("seq","mapq","flag")))
+bam.sub2
 # quicker to read partic genomic region with Which rather than creating subseq manually
+bam.sub2 <- bam.sub2[mcols(bam.sub2)$mapq >30 &mcols(bam.sub2)$flag != 1024]
+length(bam.sub)
+length(bam.sub2)
+all(names(bam.sub)==names(bam.sub2))
+length(hg19[["chr22"]])
+
+###
+chrLen <- NULL
+cnames <- seqnames(hg19)
+# need to define seqnames - see ranges.R
+cnames
+
+
+### 150728 PM ###
+N<- 60 # participants (variables)
+N
+## repeat block start
+K<-2 # two possible treatments (levels)
+# N/K 30 
+G <- rep(c("Treatment A", "Control"), N/K)
+#View(G)
+#table(G)
+G
+Y <- rep(NA, N) #values for expression not yet controlled
+Y
+#when pt received treatment A give value 2
+Y[which(G=="Treatment A")] <- 2
+#when pt received control give value 1.5
+Y[which(G=="Control")] <- 1.5
+Y
+# this is expected value
+# add stochastic part - random bias - of biological differences between patients
+# random error terms - normal distribution fits well, not biased
+# generate random values n=N, from normal distribution with 0 mean, and 0.5 SD
+# it's pseudorandom - can predict next number of sequence from previous
+# can set seed so we all get the same
+#set.seed(353)
+error <- rnorm (N, 0, 0.5)
+error
+summary(error)
+Y <- Y + error
+Y
+# tilde is symbol of linear model or statistical model in R
+boxplot (Y ~ G)
+## end block repeat
+## repeat to see random varibility
+#using baseline
+BASELINE <- 1.5
+#create second vector of expression that will be baseline for all
+Y2 <- rep(BASELINE, N)
+# add effect of differential expression (a)
+Y2[which(G=="Treatment A")] <- BASELINE + 0.5
+# add error as before
+Y2 <- Y2 + error
+boxplot (Y2 ~ G)
+# no change, model same, just defined in terms of differential expression
+# make design matrix
+model.matrix ( ~ G) # uses intercept
+model.matrix ( ~ 0 + G) # without intercept
+###
+set.seed(353)
+N <- 120
+K1 <- 2 # factor 1, 2 levels
+K2 <- 2 # factor 2, 2 levels
+G1 <- rep(c("Treatment A", "No Treatment"), N/K1)
+G1
+# do 3 into 2
+G2 <- rep(c("ER-","ER+"), c(N/K2,N/K2))
+G2
+rep(c("Treatment A", "No Treatment"), 2)
+rep(c("ER-","ER+"), c(2,2))
+?rep
+table(G1,G2)
+BASELINE<-1
+Y<- rep(BASELINE, N)
+Y[which(G1=="Treatment A")]<-BASELINE +1
+Y[which(G2=="ER+")]<-Y[which(G2=="ER+")] - 1.5
+error<- rnorm(N,0,0.5)
+Y
+Y<- Y+error
+Y
+Y2<- rep(BASELINE, N)
+Y2[which(G1=="Treatment A")]<-BASELINE +1 # effect of Rx A
+Y2[which(G2=="ER+")]<-Y2[which(G2=="ER+")] -1.5 # effect of ER+
+Y2[which(G1=="Treatment A" & G2=="ER+")]<-Y2[which(G1=="Treatment A" & G2=="ER+")] +1 -1.5 +3 # effects of Rx A, ER+, interaction
+Y2
+#get means of each of the groups to make graphs like factor a and b vs expression
+interaction.plot(G1,G2,Y)
+#sample size changes can make things different
+interaction.plot(G1,G2,Y2) # see this looks more obvious the effect of Rx vs ER status
+#try with different sample sizes
+### Using lm function to estimate model SE etc.
+?lm
+m1 <- lm(Y ~ G1 + G2) # without interaction
+m1
+summary(m1)
+m1 <- lm(Y ~ G1 * G2) # with interaction
+m1
+summary(m1)
+#95%CI is estimate +-2*SE
+#beta hat
+m2 <- lm(Y2 ~ G1 + G2)
+m2
+summary(m2)
+m2 <- lm(Y2 ~ G1 * G2)
+m2
+summary(m2)
+?fitted
+fitted(m1)
+plot(m1)
+par(ask=FALSE)
+plot(fitted(m1))
+?interaction
+plot(fitted(m1)~interaction(G1,G2))
+# fitted values yhat = beta hat . x
+plot(resid(m1))
+plot(resid(m1), pch=16, col="red")
+#residuals (observed errors)
+#allow for more complex data with non normal distributed (errors)
+
+### Bowtie2 / TopHat2 alignment ###
+library(Rsubread)
+getwd()
+setwd("/home/participant/Course_Materials/Day2/")
+filesToCount <- dir("bam", pattern=".bam$", full.names=T)
+tmp <- featureCounts(filesToCount, annot.inbuilt = "hg19", ignoreDup = F)
+save(tmp, file="../Day3/countMatrix.RData")
