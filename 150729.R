@@ -152,6 +152,7 @@ tmp$annotation[11420,]
 
 
 ## supplementary
+rm(list=ls())
 file.choose()
 rawdata <- read.delim("Day3/rnaSeq/OralCarcinoma/TableS1.txt", check.names=FALSE, stringsAsFactors=FALSE)
 head(rawdata)
@@ -193,7 +194,7 @@ head(y$genes)
 head(y$counts)
 o<-order(rowSums(y$counts))
 head(o)
-head(y) - has three vectors - counts, samples and genes
+head(y) # has three vectors - counts, samples and genes
 y<-y[o,]
 head(y)
 nrow(y)
@@ -226,3 +227,126 @@ plotMDS(y)
 Patient<- factor(c(8,8,33,33,51,51))
 Tissue<- factor(c("N","T","N","T","N","T"))
 data.frame(Sample=colnames(y),Patient,Tissue)
+design<-model.matrix(~Patient+Tissue)
+rownames(design)<-colnames(y)
+colnames(y)
+head(design)
+design
+y<-estimateGLMCommonDisp(y, design, verbose=TRUE) #adds $common dispersion
+head(y) 
+length(y$common.dispersion)
+y<-estimateGLMTrendedDisp(y,design)
+head(y)
+length(y$trended.dispersion)
+y<-estimateGLMTagwiseDisp(y,design)
+head(y)
+length(y$tagwise.dispersion)
+plotBCV(y)
+
+#Determine differentially expressed genes
+#fit genewise generalised linear models
+?glmFit # genewise negative binomial GLM
+fit<-glmFit(y, design) #fit a negative binomial generalised log-linear model to the readcounts for each gene
+?glmLRT #produces also table object (df with same rows as y containing the log2-fold changes, likelihood ratio stats and p values ready to be displayed by topTags.. and comparison object with char string of the coefficient or contrast being tested
+lrt<-glmLRT(fit) # has conducted test for last coeffienct in the linear model, tumour v normal 
+lrt
+topTags(lrt)
+colnames(design)
+
+o<-order(lrt$table$PValue)
+cpm(y)[o[1:10],]
+summary(de <- decideTestsDGE(lrt))
+detags<-rownames(y)[as.logical(de)]
+plotSmear(lrt, de.tags=detags)
+abline(h=c(-1,1),col="blue")
+#for fun 
+heatmap(design, de.tags=detags)
+
+### 150729 PM ###
+library(biomaRt)
+head(listMarts(),5)
+ensembl<-useMart("ensembl")
+
+ensembl
+ensembl<-useMart("ensembl", dataset="hsapiens_gene_ensembl")
+ensembl
+head(listDatasets(ensembl),10)
+head(listFilters(ensembl),5)
+flt<-listFilters(ensembl)
+dim(flt) #use chromosome_name to query
+flt
+flt[grep("entrez",flt[,1]),]
+#myinfo can be slow to get for 100s or 1000s
+head(listAttributes(ensembl),25)
+entrez<-c("673","837")
+myfilter<-"entrezgene"
+attr=c("entrezgene","hgnc_symbol","ensembl_gene_id","description")
+allAttr<-listAttributes(ensembl)
+attr %in% allAttr[,1]
+myInfo<-getBM(filters="entrezgene", values=entrez, attributes=attr,mart=ensembl)
+myInfo
+myfilters <- c("chromosome_name", "start", "end")
+#filter by called start, later attribute called start_position
+myvalues <- list(16, 1100000, 1250000)
+head(allAttr[grep("start", allAttr[,1]),])
+attr<-c("ensembl_gene_id","hgnc_symbol","entrezgene",)
+#chromosome name is 16 not chr16
+#biomart server can block you. or be down. and you need to be online
+#Bioconductor packages then available instead, every 6 months
+#org.Hs.eg.db
+#also loads DBI - deals with databases
+#bigger than standard package as it's a database
+#uses keytypes vs filters
+keytypes(org.Hs.eg.db)
+#has fewer, but the common types
+#gives chromosome location, number and strand
+
+#may wish to know more about gene structure 
+# e.g. genomic features - take data from biomaRt and others and makes gene models for each organism
+library(TxDb.Hsapiens.UCSC.hg19.knownGene) #transcript database for given organism and resource version
+txdb<-TxDb.Hsapiens.UCSC.hg19.knownGene
+txdb
+keytypes(txdb)
+columns(txdb)
+select(txdb,keys=entrez, keytype="GENEID",columns=c("TXID","TXCHROM","TXSTART","TXEND"))
+#exons reversed in genomic coordinate order?
+# if we have bed file or gff file - packages rtracklayer imports these
+# bed file is gene location
+# wig file
+# gtf file
+# result is GRanges object
+# for targeted sequencing check this has been efficient
+# Roche NimbleGen
+
+## 150729PM Practical ##
+library(biomaRt)
+listMarts()
+ensemblLatest<-useMart("ensembl")
+datasets<-listDatasets(ensemblLatest)
+datasets[which(datasets[,1]=="hsapiens_gene_ensembl"),]
+#unfortunately our RNAseq was aligned and annotated against hg19. Different versions of biomaRt and genome vesion can have diff attributes and underlying annotation
+#connect to Feb 2014 hg archive
+ensembl_75 = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="feb2014.archive.ensembl.org",path="/biomart/martservice", dataset="hsapiens_gene_ensembl")
+datasets <- listDatasets(ensembl_75)
+datasets[which(datasets[,1]=="hsapiens_gene_ensembl"),]
+load("Day3/topHits_FWER_0.01.RData")
+head(topHits)
+dim(topHits)
+topHits<-topHits[1:100,] # just taking 
+length(topHits)
+dim(topHits)
+#use biomaRt to annotate the results of our RNAseq analysis.
+#the first col in the topHits dataframe are EntrezIDs.
+flt<- listFilters(ensembl_75)
+head(flt)
+flt
+#this is the filter for entrez gene ID
+flt[grep("entrez",flt[,1]),]
+attr<-listAttributes(ensembl_75)
+attr[1:50,]
+attr[grep("symbol",attr[,1]),] # hgnc_symbol HGNC symbol
+extraInfo <- getBM(attributes = c("entrezgene","hgnc_symbol","description"),
+                   filters="entrezgene",values=topHits[,1], mart=ensembl_75)
+head(extraInfo) #annotate the topHits
+annotatedHits<-merge(topHits, extraInfo, by.x =1, by.y =1, sort=FALSE)
+head(annotatedHits)
