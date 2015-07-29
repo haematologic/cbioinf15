@@ -325,9 +325,10 @@ ensemblLatest<-useMart("ensembl")
 datasets<-listDatasets(ensemblLatest)
 datasets[which(datasets[,1]=="hsapiens_gene_ensembl"),]
 #unfortunately our RNAseq was aligned and annotated against hg19. Different versions of biomaRt and genome vesion can have diff attributes and underlying annotation
-#connect to Feb 2014 hg archive
+#connect to Feb 2014 hg archive - this result was from Mark from google
 ensembl_75 = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="feb2014.archive.ensembl.org",path="/biomart/martservice", dataset="hsapiens_gene_ensembl")
 datasets <- listDatasets(ensembl_75)
+#verify the version is GRCh37.p13
 datasets[which(datasets[,1]=="hsapiens_gene_ensembl"),]
 load("Day3/topHits_FWER_0.01.RData")
 head(topHits)
@@ -344,9 +345,209 @@ flt
 flt[grep("entrez",flt[,1]),]
 attr<-listAttributes(ensembl_75)
 attr[1:50,]
-attr[grep("symbol",attr[,1]),] # hgnc_symbol HGNC symbol
+attr[grep("symbol",attr[,1]),] # hgnc_symbol is the name to use for HGNC symbol
 extraInfo <- getBM(attributes = c("entrezgene","hgnc_symbol","description"),
                    filters="entrezgene",values=topHits[,1], mart=ensembl_75)
 head(extraInfo) #annotate the topHits
+# !careful - it has orderd by alphanumeric not by p-value as obtained from topHits!
 annotatedHits<-merge(topHits, extraInfo, by.x =1, by.y =1, sort=FALSE)
-head(annotatedHits)
+# specify column in these two dataframes that have the same identifier in x=1 and y=1
+# not resorted based on extra info, but as it was in topHits
+dim(annotatedHits) # has grown by 1
+dim(topHits)
+which(duplicated(annotatedHits[,1])) # which is duplicated
+annotatedHits[80:85,] # 82 is the first instance, 83 the second
+head(topHits) # gene column is 1
+head(annotatedHits) # gene column is 1
+#the resulting annotatedHits table can be used to ease the interpretation of the RNA-seq analysis and can be shared with collaborators
+dim(annotatedHits)
+tail(annotatedHits)
+
+#retrieve gene sequences
+head(topHits)
+head(topHits[,1])
+posInfo<-getBM(attributes=c("entrezgene","chromosome_name","start_position",
+                            "end_position","strand"),
+               filters="entrezgene",
+               values=topHits[,1],
+               mart=ensembl_75)
+posInfo
+head(posInfo[posInfo[,2] %in% c(1:22, "X","Y"),])
+posInfo<-posInfo[posInfo[,2] %in% c(1:22, "X","Y"),] # get rid of extra unassembled chromosomes, in practice wouldnt use biomaRt
+head(posInfo)
+#NB chr number is a numeric value not chr-prefixed string and strand is 1 or -1 not + -
+
+#Create GRanges representation of these gene coordinates. Make sure that the sequence names and strand info is acceptable.
+library(GenomicRanges)
+posInfo[1:10,5]
+strand=ifelse(posInfo[,5]==1, "+", "-") #clever
+strand[1:10]
+#paste0("chr",posInfo[,2]) - is adding chr to every posInfo[,2]
+genePos <- GRanges(paste0("chr",posInfo[,2]),
+                   IRanges(posInfo[,3],posInfo[,4],names=posInfo[,1]),strand)
+#paste0 concatenates with no spaces, default paste adds a space
+genePos
+#with function allows columns from a data frame to be accessed by name vs column index- result the same
+genePos<- with(posInfo, GRanges(paste0("chr",chromosome_name),
+                                IRanges(start_position, end_position, names=entrezgene),
+                                strand))
+#paste0 has no spaces
+genePos
+
+#load package providing seq for hg19 and get DNA seq for the top hits. Translate into aa
+library(BSgenome.Hsapiens.UCSC.hg19)
+hg19<-BSgenome.Hsapiens.UCSC.hg19
+myseqs<-getSeq(hg19,genePos)
+myseqs
+translate(myseqs)
+
+#get seq 100 bp upstream of each gene and write these to a fasta file
+promSeqs <- getSeq(hg19, flank(genePos,100))
+writeXStringSet(promSeqs , file="topGenesPromoters.fa")
+promSeqs
+#View(promSeqs)
+
+##annotation using pre built packages
+library(org.Hs.eg.db)
+hs<-org.Hs.eg.db
+columns(hs)
+keytypes(hs)
+chr22Genes <- select(hs, columns="ENTREZID", keytype="CHR", keys="22")
+#complains about CHR being deprecated
+head(chr22Genes)
+chr22ID<-chr22Genes[,2]
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+tx<-TxDb.Hsapiens.UCSC.hg19.knownGene
+exo<-exonsBy(tx,"gene")
+#takes a sec
+exo
+length(exo)
+chr22ID
+exo22<-exo[names(exo) %in% chr22ID]
+
+#import the aligned reads for sample "16N" using GenomicAlignments
+library(GenomicAlignments)
+bam<-readGAlignments(file="Day2/bam/16N_aligned.bam",
+                     param=ScanBamParam(which=GRanges("chr22", IRanges(1,51304566))),
+                     use.name=TRUE)
+bam
+#now can overlap reads with exons
+#findOverlaps will report the amount
+#start with overlaps of single gene to make sure we understand output
+counts<- countOverlaps(exo22[["4627"]],bam)
+counts
+so<- summarizeOverlaps(exo22, bam)
+# extends findOverlaps by providing options to resolve reads that operlap multiple features.
+# Each read is counted a maximum of once. Different modes of counting available.
+# ?summarizeOverlaps
+so
+
+?assays
+gCounts<-assays(so)$counts
+dim(gCounts)
+head(gCounts)
+
+#visualisation
+geneRegions<- unlist(range(exo))
+#select names of statistically significant genes from the edgeR output in the usual manner
+load("Day3/topHits_FWER_0.01.RData")
+sigResults<-topHits
+head(sigResults)
+sigGeneRegions<- geneRegions[na.omit(match(sigResults[,1],names(geneRegions)))]
+# for some reason some of the genes reported in the edgeR output do not have associated genomic features. Hence we have to discard such genes from the output using na.omit
+head(sigGeneRegions)
+
+#the bed format is also able to colour each range according to some property of the analysos (e.g. direction or magnitude of change)
+# a score can also be displayed when a particular region is clicked on.
+
+#can attach metadata to GRanges
+head(sigResults[,1])
+mcols(sigGeneRegions)<-sigResults[match(names(sigGeneRegions), sigResults[,1]),]
+#stores adjusted p-values and log fold-change in the ranges object
+head(sigGeneRegions)
+head(mcols(sigGeneRegions))
+
+# use the human organism package to add gene symbols
+sigGeneRegions$genes
+anno <- select(org.Hs.eg.db,keys=sigGeneRegions$genes,
+               keytype="ENTREZID", columns="SYMBOL")
+head(anno)
+tail(anno)
+mcols(sigGeneRegions)$Symbol<-anno[,2]
+mcols(sigGeneRegions)$Symbol
+
+#tidy up the genomic ranges object so that only chr 1 to 22 and x y are included
+seqlevels(sigGeneRegions)
+?seqlevels
+sigGeneRegions<-keepSeqlevels(sigGeneRegions, paste0("chr",c(1:22,"X","Y")))
+
+#create a score from the p-values that will be displayed under each region and colour scheme for the regions based on the fold change. For convenience restrict fold changes to be within the region -3 to 3
+Score<- -log10(sigGeneRegions$FWER)
+rbPal<- colorRampPalette(c("red", "blue"))
+
+logfc<- pmax(sigGeneRegions$logFC, -3)
+logfc<- pmin(logfc, 3)
+
+Col<- rbPal(10)[as.numeric(cut(logfc, breaks=10))]
+
+#the colours and score can be saved in the GRanges object and score and itemRgb columns respectively. 
+mcols(sigGeneRegions)$score<-Score
+mcols(sigGeneRegions)$itemRgb<-Col
+library(rtracklayer)
+export(sigGeneRegions, con="topHits.bed")
+#can also export bed wig gff
+
+#ggplot2
+load("Day3/edgeRAnalysis_ALLGENES.RData")
+head(y)
+y$significance<- -10*log10(y$FDR)
+edgeRresults<-y
+
+library(ggplot2)
+ggplot(edgeRresults, aes(x=logFC, y=significance)) + geom_point()
+edgeRresults$DE <- edgeRresults$FDR < 0.01
+ggplot(edgeRresults, aes(x=logFC, y=significance,col=DE)) + geom_point()
+#make an MA plot
+ggplot(edgeRresults, aes(x=logCPM, y=logFC, col=DE)) + geom_point()
+ggplot(edgeRresults, aes(x=logCPM, y=logFC, col=DE)) + geom_point(alpha=0.4) + scale_color_manual(values = c("black","red"))
+ggplot(edgeRresults, aes(x=logCPM, y=logFC, col=DE,size=significance)) + geom_point(alpha=0.4) +
+  scale_colour_manual(values=c("black","red"))
+
+library(ggbio)
+plotGrandLinear(sigGeneRegions, aes(y=score))
+mcols(sigGeneRegions)$Up <- logfc> 0
+plotGrandLinear(sigGeneRegions, aes(y=logFC, col=Up))
+myGene <- which(seqnames(sigGeneRegions)=="chr22" & mcols(sigGeneRegions)$logFC <0)[1]
+sigGeneRegions[myGene]
+entrez<- sigGeneRegions$genes[myGene]
+#plot gene structure
+autoplot(tx, which=exo22[[entrez]])
+myreg<-flank(reduce(exo22[[entrez]]), 1000, both=T)
+bamSubset<-bam[bam %over% myreg]
+#plot numer of reads in this region
+autoplot(bamSubset, which=myreg)
+#repeat plot with a smoothed coverage
+autoplot(bamSubset , stat="coverage")
+#make ideogram for Chr22
+idPlot<-plotIdeogram(genome="hg19",subchr="chr22")
+idPlot
+#make combined plot of aligned reads and transcripts for selected gene
+geneMod<-autoplot(tx,which=myreg)
+reads1<-autoplot(bamSubset, stat="coverage")
+tracks(idPlot,geneMod,reads1)
+
+#compare coverage of several samples on the same plot.
+#loop for a vector of file names
+mytracks<-alist()
+fls<-paste0("Day2/bam/", dir("Day2/bam/",pattern=".bam"))
+fls<-fls[-grep("bai",fls)]
+names(fls)<-basename(fls)
+for (i in 1:length(fls)){
+  bam<-readGAlignments(file=fls[i],
+                       param=ScanBamParam(which=GRanges("chr22",IRanges(1,51304566))),
+                       use.name=TRUE)
+  bamSubset<-bam[bam %over% myreg]
+  mytracks[[i]]<-autoplot(bamSubset, stat="coverage") + ylim(0,20)
+}
+tracks(idPlot,geneMod,mytracks[[1]], mytracks[[2]], mytracks[[3]], mytracks[[4]], mytracks[[5]], mytracks[[6]])
+#doesnt display separate legend for each bam file
