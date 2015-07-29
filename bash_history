@@ -1,229 +1,3 @@
-ls doc/
-cat doc/README 
-ls
-cd ..
-which bowtie
-ls /applications/local/bin/bowtie
-ll /applications/local/bin/bowtie
-ls /applications/local/LEGACY/bowtie/
-bowtie --version
-/applications/local/SICER/SICER.sh
-. /applications/local/SICER/SICER.sh
-/applications/local/SICER/SICER-rb.sh
-vim .bashrc
-cd Desktop/STAR-STAR_2.4.0j/
-ls
-make star
-make STAR
-cd source/
-make STAR
-less Makefile 
-ls
-cd ..
-ls
-ls bin/
-ls bin/Linux_x86_64
-ls bin/Linux_x86_64_static/
-which STAR
-ll /usr/local/bin/STAR 
-aptitude search STAR
-aptitude search STAR | grep $i
-aptitude search STAR | grep ^i
-aptitude search star | grep ^i
-which STAR
-su brewmaster
-STAR
-STAR --version
-cd ..
-su brewmaster
-ngs.plot.r 
-bedGraphToBigWig 
-htseq-count 
-bowtie
-ls
-cd Desktop/
-mkdir ngsplot
-cd ngsplot/
-git clone https://code.google.com/p/ngsplot
-git checkout 9a4e02aef52b
-ls
-cd ngsplot/
-ls
-git checkout 9a4e02aef52b
-ls
-cat README 
-ls
-ls bin/
-cat README 
-ls
-make
-ls bin
-ls
-cat Makefile 
-ls
-make all
-ls
-ls bin
-less Makefile 
-ls
-make database
-ls
-less README 
-ls
-cat Changes 
-meme
-meme --version
-make all
-ls
-make clean
-ls
-less Makefile 
-ls
-make all
-ls
-ls ..
-ls
-cd ../..
-ls
-cd ngsplot
-ls
-bin/ngs.plot.r 
-ls
-vim README 
-ls
-ls bin/
-cd
-ls
-SICER-df-rb.sh 
-python
-fastqc
-aptitude search fastx
-fastx --version
-apt-show-versions fastx-toolkit
-which samtools
-samtools
-which bedtools 
-apt-show-versions bedtools
-aptitude search ucsc
-ls
-cd Desktop/
-ls
-mkdir UCSC
-cd UCSC/
-wget -r --no-parent http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
-ls
-ls hgdownload.cse.ucsc.edu/
-ls hgdownload.cse.ucsc.edu/admin/
-ls hgdownload.cse.ucsc.edu/admin/exe/
-ls hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
-ls hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/index.html
-wget -r --no-parent http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/index.html
-wget -r --no-parent http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
-wget -r --user-agent=Mozilla --no-parent http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
-ls hgdownload.cse.ucsc.edu/
-cat hgdownload.cse.ucsc.edu/robots.txt 
-wget -r --user-agent=Mozilla -e robots=off --no-parent http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
-ls
-cd hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/blat/
-ls
-cd ..
-ls
-ls blat
-mv blat/blat .
-mv blat/gfClient .
-mv blat/gfServer .
-mv blat/blat ./blatt
-rm -r blat
-mv blatt blat
-ld
-ls
-rm index*
-ls
-chmod +x ./*
-ls
-which tabix
-apt-file tabix
-apt-file search tabix
-bwa
-samtools
-aptitude search htslib
-aptitude search bcftools
-cd Desktop/
-mkdir htslib
-cd htslib/
-git clone https://github.com/samtools/htslib.git
-cd htslib/
-autoconf
-./configure 
-make
-su brewmaster
-which tabix
-cd ..
-ls
-git clone https://github.com/samtools/bcftools.git
-cd bcftools/
-ls
-cat INSTALL 
-ls
-make
-su brewmaster
-ngsplotdb.py 
-less .bashrc
-vim .bashrc
-perl ensembl/misc-scripts/ping_ensembl.pl
-perl
-perl /usr/local/Ensembl/ensembl/misc-scripts/ping_ensembl.pl
-perl variant_effect_predictor.pl -i example.vcf --cache
-cd /applications/local/ensembl-tools-release-79/scripts/variant_effect_predictor/
-ls
-perl INSTALL.pl 
-perl variant_effect_predictor.pl -i example.vcf --cache
-ls .vep
-ls ~/.vep
-cd
-perl variant_effect_predictor.pl -i example.vcf --cache
-cd /applications/local/ensembl-tools-release-79/scripts/variant_effect_predictor/
-perl INSTALL.pl 
-perl variant_effect_predictor.pl -i example.vcf --cache
-variant_effect_predictor.pl -i example.vcf --cache
-variant_effect_predictor.pl -i example.vcf
-variant_effect_predictor.pl -i example.vcf --database
-ls .vep
-ls .vep/homo_sapiens/
-rm -r .vep/*
-cd /applications/local/ensembl-tools-release-79/scripts/variant_effect_predictor/
-perl INSTALL.pl 
-vim INSTALL.pl 
-ls
-cd
-cd .vep
-ls
-ls tmp/
-rm -r tmp/
-ls
-mv ../Desktop/homo_sapiens_vep_79_GRCh3* .
-mv ../Desktop/xiphophorus_maculatus_vep_79_Xipmac4.4.2.tar.gz .
-ls
-mkdir homo_sapiens
-mv homo_sapiens_vep_79_GRCh3* homo_sapiens
-mkdir xiphophorus_maculatus
-mv xiphophorus_maculatus_vep_79_Xipmac4.4.2.tar.gz  xiphophorus_maculatus
-cd /applications/local/ensembl-tools-release-79/scripts/variant_effect_predictor/
-perl variant_effect_predictor.pl -i example.vcf --cache
-cd 
-variant_effect_predictor.pl -i example.vcf --cache
-cd .vep
-cd homo_sapiens/
-ls
-tar xvzf homo_sapiens_vep_79_GRCh37.tar.gz 
-tar xvzf homo_sapiens_vep_79_GRCh38.tar.gz 
-ls
-rm *.gz
-ls
-mv homo_sapiens/* .
-ls
-rmdir homo_sapiens/
-variant_effect_predictor.pl -i example.vcf --cache
 cd ..
 cd xiphophorus_maculatus/
 ls
@@ -1998,3 +1772,229 @@ ls
 cd Course_Materials/Day1/alignment-demo/
 ls
 samstat SRR1186252_trimmed.fq.chr6.fq.sorted.bam
+cp .bash_history ~/db/bash_history
+cd db
+git clone git@github.com:haematologic/cbioinf15.git .
+git clone git@github.com:haematologic/cbioinf15.git
+ls
+cd cbioinf15/
+ls
+mv ../* .
+ls
+git status
+git add .
+ls -latr
+cd ..
+ls
+cd ..
+cd Course_Materials/
+ls
+cd Day1/
+ls
+cd nki/
+ls
+cd ..
+ls
+cd qa/
+ls
+ls -latr
+cp *.html ../../../db/cbioinf15/
+ls
+ls -latr
+cd ..
+ls
+cd nki
+ls
+ls -latr
+cd ..
+ls
+cd ..
+ls
+cd Course_Materials/Day1/alignment-demo/
+ls -latr
+cp *.html ../../../db/cbioinf15/
+cp SRR1186252_trimmed.fq.chr6.fq.sorted.bam.tdf ../../../db/cbioinf15/
+cd ../../../
+ls
+cd db
+ls
+cd cbioinf15/
+ls
+git status
+git add .
+git commit -am "day 1 working materials"
+git config user.email "e@e.com"
+git config user.name "My name"
+git config
+git info
+git status
+git commit -am "day 1 working materials"
+git push origin master
+git remove 150727.RData
+git rm 150727.RData 
+git status
+git commit -am "day 1 working materials"
+git push origin master
+git rm 150727.RData 
+ls
+git status
+sudo rm -R .git/
+rm .git/
+cd .git/
+ls
+cd ..
+rm -R .git/
+y
+ls
+ls -latr
+cd ..
+git clone git@github.com:haematologic/cbioinf15.git
+git clone git@github.com:haematologic/cbioinf15.git ./cbioinf15/
+mv cbioinf15/* .
+git clone git@github.com:haematologic/cbioinf15.git
+mv * cbioinf15/
+cd cbioinf15/
+ls -latr
+git status
+git add .
+git commit -am "day 1 working materials"
+git config user.email "e@e.com"
+git config user.name "My name"
+git commit -am "browser history"
+git push origin master
+firefox SRR1186252_trimmed.fq.chr6.fq.sorted.bam.samstat.html 
+git add .
+del *
+rm *
+ls
+ls -latr
+cd .git
+yes 
+yes rm *
+yes | rm *
+ls 
+yes | rm -R *
+ls
+ls -latr
+cd ..
+yes | rm -R *
+ls
+ls -latr
+rm .git/
+rmdir .git/
+ls
+cd ..
+rmdir cbioinf15/
+ls
+ls -latr
+rm ~/.ssh/id_rsa*.*
+ls ~/.ssh/
+exit
+ls -latr
+ls -latrls
+mkdir db
+cd db
+ssh-keygen -t rsa -b 4096 -C "e@e.com"
+cat ../.ssh/id_rsa.pub
+git config user.name "DB"
+git clone git@github.com:haematologic/cbioinf15.git
+ls
+cat ../.ssh/id_rsa.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDb74BrEMiJu+upyjsA8oiVrXGrufjaPm0WWBze9DmvAgtyTitf28Nwx2WS+AXadr6tlPjHmsGy7GuJrEjJkvCj/ZEIe16nqLo+kY4942UGo6q6Z+8TSp500cgoprVExuMuk22KcJq0KW8iuybvUp7VmHU6qJNkaBIS5WxLTynPNMVrcxTC9ENKSL1BIR72hkhosY7CJITRzdALvsDkypBfIbb5KyVFSe/Ml+Lea+dtML1tz5n/kWLX+MLXM0xoK5d/gkxGtS6zwInDUlgtzCtU96WzGzVdv6BKhNMCu6s4SNkljVcQJxlKnRoem9skGw/Ivi38ELTFJxC2Eu/JV4tGcbmn5pKPBwXiUUvyPuOri8hQuLcWRlhwpDUFdDRJ8Ct6VtvDZ72MYcvEi4L1WuszySoCM+tEOKklTYpZh7jbBAlnIpMHll0CdQEOKtkx/zQ9x/b3/DtODhWbt5yddHX6F+SSWteL5leaKSxDAIPSoWQMU1ZywecHGucQUGAMaDysXP/xSxWkawZ+GXMu1fLJBfucSPQaHI7QJSdO0ZeoDKpV6aMAmC6GoC8sgLvFBecN04j0gVB7KQEi2bLXpSvmHjQwmIAKlPDWZLK/RnMF0hoR3KCi1ek9utSerhFumJacdJMXyK+zSexabNxXYuVaS50M3jkqBGO0YiT2/ftzIQ== e@e.com
+git clone git@github.com:haematologic/cbioinf15.git
+cd db
+ls
+git clone git@github.com:haematologic/cbioinf15.git
+ssh-add ~/.ssh/id_rsa
+git clone git@github.com:haematologic/cbioinf15.git
+ls
+cd cbioinf15/
+git config user.name "DB"
+git config user.email "haematologic+github@gmail.com"
+git config user.name "DLB"
+ls
+git status
+git add .
+git commit -am "morning practical 150728 - alignment in R of genomic data"
+git push origin master
+cd ../..
+cd Course_Materials/Day2/
+ls
+ls -latr
+fastqc 16N_reads.fq 
+firefox 16N_reads_fastqc.html 
+export BOWTIE2_INDEXES="$HOME/Course_Materials/ref_data/bowtie/"
+echo $BOWTIE2_INDEXES
+ls
+ls ../ref_data/bowtie/
+cp ../ref_data/chr22.fa ../ref_data/bowtie/
+ls
+ls ../ref_data/
+ls ../ref_data/bowtie/
+export BOWTIE2_INDEXES="$HOME/Course_Materials/ref_data/bowtie/"
+ls
+ls -l
+ls ..
+ls -l ..
+ls -l .
+ls .
+ls ..
+ls /
+ls ../../
+ls ~/.
+mkdir Tophap2_Alignment
+tophat2 --output-dir Tophat2_Alignment chr22 16N_reads.fq
+samtools index Tophat2_Alignment/accepted_hits.bam
+samtools flagstat Tophat2_Alignment/accepted_hits.bam
+samtools flagstat Tophat2_Alignment/unmapped.bam
+ls
+ls -latr
+mkdir Tophat2_Alignment
+rm Tophap2_Alignment/
+rmdir Tophap2_Alignment/
+cd Tophat2_Alignment/
+ls
+ls -latr
+cd ..
+ls bam/
+samtools flagstat bam/16N_aligned.bam
+samtools view -H bam/16N_aligned.bam
+cufflinks -h
+cufflinks Tophat2_Alignment/accepted_hits.bam > Tophat2_Alignment/cufflinksResult
+ls Tophat2_Alignment/
+vi transcripts.gtf 
+vi genes.fpkm_tracking 
+vi isoforms.fpkm_tracking 
+library (Rsubread)
+ls
+ls -latr
+cd ..
+ls
+cd ..
+ls
+cd db/
+ls
+cd cbioinf15/
+ls
+ls -latr
+git status
+git add 150728*
+git status
+git commit -m "end of day 2"
+git push origin master
+git add 150728*
+git commit -m "end of day 2"
+git push origin master
+ssh-remove ~/.ssh/id_rsa
+ssh-add --h
+ssh-add -d ~/.ssh/id_rsa
+cd ~/.ssh/
+ls
+rm id_rsa.pub 
+rm id_rsa 
+cd..
+ls
+cd ..
+ls
+cd db
+exit
