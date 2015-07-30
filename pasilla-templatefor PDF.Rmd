@@ -1,0 +1,82 @@
+---
+title: "Pasilla Analysis in EdgeR"
+author: "Duncan Brian"
+date: '`r format(Sys.time(), "Last modified: %d %B, %Y")`'
+output: pdf_document
+---
+
+```{r packageload, echo=FALSE, message=FALSE}
+library(formatR)
+```
+
+
+
+
+Load edgeR and set working directory
+```{r dataload, message=FALSE}
+library(edgeR)
+setwd("/home/participant/Course_Materials")
+```
+
+Load the count file
+```{r }
+datafile = system.file( "extdata/pasilla_gene_counts.tsv", package="pasilla" )
+```
+```{r style, echo=FALSE, message=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=65)}
+datafile
+```
+
+Read the count table and print out
+```{r readCounts}
+pasillaCountTable = read.table(datafile, header=TRUE, row.names=1)
+
+head(pasillaCountTable)
+```
+
+Construct the design and setup the conditions. Report how many samples were in the treated and untreated groups
+
+```{r makeDesign}
+pasillaDesign = data.frame(
+  row.names = colnames( pasillaCountTable ),
+  condition = c( "untreated", "untreated", "untreated",
+                 "untreated", "treated", "treated", "treated" ),
+  libType = c( "single-end", "single-end", "paired-end",
+               "paired-end", "single-end", "paired-end", "paired-end" ) )
+
+pasillaDesign
+
+pairedSamples = pasillaDesign$libType == "paired-end"
+countTable = pasillaCountTable[ , pairedSamples ]
+condition = pasillaDesign$condition[ pairedSamples ]
+```
+
+Normalise 
+
+```{r normalise}
+y <- DGEList(counts=countTable,group=condition)
+y <- calcNormFactors(y)
+y <- estimateCommonDisp(y)
+y <- estimateTagwiseDisp(y)
+```
+
+
+Do the differential expression test and print the table of top hits
+
+```{r doDE}
+
+et <- exactTest(y)
+topTags(et)
+```
+
+Use the results of the previous code-chunk to comment on how many up and down regulated genes were found at a p-value cut-off of 0.05. [Embed your answers in this section of text quoting the p-value cut-off and number of genes]
+
+Produce the smear plot, but hide the code
+
+```{r plotSmear, echo=FALSE}
+summary(de <- decideTestsDGE(et, p=0.05))
+detags <- rownames(y)[as.logical(de)]
+plotSmear(et, de.tags=detags)
+abline(h = c(-2, 2), col = "blue")
+
+```
+

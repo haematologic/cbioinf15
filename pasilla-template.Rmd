@@ -1,0 +1,57 @@
+---
+title: "Pasilla Analysis in EdgeR"
+author: "Duncan Brian"
+output: pdf_document
+---
+
+Put your code to load edgeR and locate the count file
+setwd("/home/participant/Course_Materials"
+
+```{r dataload, message=FALSE}
+library(edgeR)
+
+```
+
+```{r results='hide'}
+datafile = system.file( "extdata/pasilla_gene_counts.tsv", package="pasilla" )
+datafile
+```
+
+```{r}
+pasillaCountTable = read.table(datafile, header=TRUE, row.names=1)
+
+head(pasillaCountTable)
+```
+
+Read the count table and print out
+
+```{r readCounts}
+```
+
+Construct the design and setup the conditions. Report how many samples were in the treated and untreated groups
+
+```{r makeDesign}
+
+```
+
+Normalise 
+
+```{r normalise}
+
+```
+
+
+Do the differential expression test and print the table of top hits
+
+```{r doDE}
+
+```
+
+Use the results of the previous code-chunk to comment on how many up and down regulated genes were found at a p-value cut-off of 0.05. [Embed your answers in this section of text quoting the p-value cut-off and number of genes]
+
+Produce the smear plot, but hide the code
+
+```{r plotSmear}
+
+```
+
