@@ -23,7 +23,7 @@ Load the count file
 datafile = system.file( "extdata/pasilla_gene_counts.tsv", package="pasilla" )
 ```
 ```{r style, echo=FALSE, message=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=65)}
-datafile
+tidy(datafile)
 ```
 
 Read the count table and print out
